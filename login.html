@@ -63,7 +63,6 @@
       padding: 20px 0 24px;
     }
 
-    /* icon 去背透明叠加 */
     .brand-icon {
       width: 110px;
       height: 110px;
@@ -82,7 +81,6 @@
       filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
     }
 
-    /* 时钟面板 */
     .clock-panel {
       background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(4px);
@@ -116,7 +114,6 @@
       color: #4a2828;
     }
 
-    /* 两个大正方形按钮 - 多巴胺配色 */
     .button-grid {
       width: 100%;
       display: flex;
@@ -149,7 +146,6 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       border: 2px solid rgba(255,255,255,0.4);
-      position: relative;
     }
     .login-btn-clerk:active {
       transform: scale(0.95);
@@ -193,7 +189,6 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       border: 2px solid rgba(255,255,255,0.4);
-      position: relative;
     }
     .login-btn-admin:active {
       transform: scale(0.95);
@@ -214,7 +209,6 @@
       margin-top: 2px;
     }
 
-    /* 模态框 - 包含“记住我”复选框 */
     .login-modal {
       display: none;
       position: fixed;
@@ -285,7 +279,6 @@
       box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.15);
     }
 
-    /* 记住我 复选框行 - 开关风格 */
     .remember-row {
       display: flex;
       align-items: center;
@@ -303,7 +296,6 @@
       align-items: center;
       gap: 10px;
     }
-    /* 自定义开关 (toggle) */
     .switch {
       position: relative;
       display: inline-block;
@@ -394,7 +386,6 @@
       display: block;
     }
 
-    /* 底部 */
     .footer-contact {
       margin-top: 6px;
       color: rgba(255, 255, 255, 0.85);
@@ -454,18 +445,15 @@
 </head>
 <body>
   <div class="login-container">
-    <!-- Brand icon -->
     <div class="brand-icon">
       <img src="mixue.png" alt="Mixue" width="110" height="110">
     </div>
 
-    <!-- Clock -->
     <div class="clock-panel">
       <div class="time" id="liveTime">00:00:00</div>
       <div class="date" id="liveDate">Monday, 1 January 2026</div>
     </div>
 
-    <!-- Two dopamine buttons -->
     <div class="button-grid">
       <button class="login-btn-clerk" id="clerkLoginBtn">
         STAFF
@@ -479,7 +467,6 @@
       </button>
     </div>
 
-    <!-- Footer -->
     <div class="footer-contact">
       <div>
         <a href="tel:+601153789909">+60 1153789909</a> &nbsp;·&nbsp; 
@@ -494,7 +481,7 @@
     </div>
   </div>
 
-  <!-- Clerk Modal (with remember me) -->
+  <!-- Clerk Modal -->
   <div class="login-modal" id="clerkModal">
     <div class="modal-card">
       <h3>STAFF</h3>
@@ -507,7 +494,6 @@
         <label>Password</label>
         <input type="password" id="clerkPassword" placeholder="••••••" autocomplete="current-password">
       </div>
-      <!-- Remember me toggle -->
       <div class="remember-row">
         <label for="clerkRemember">
           <span>Remember me</span>
@@ -525,7 +511,7 @@
     </div>
   </div>
 
-  <!-- Admin Modal (with remember me) -->
+  <!-- Admin Modal -->
   <div class="login-modal" id="adminModal">
     <div class="modal-card">
       <h3>ADMIN</h3>
@@ -538,7 +524,6 @@
         <label>Password</label>
         <input type="password" id="adminPassword" placeholder="••••••" autocomplete="current-password">
       </div>
-      <!-- Remember me toggle -->
       <div class="remember-row">
         <label for="adminRemember">
           <span>Remember me</span>
@@ -582,7 +567,7 @@
     const clerkRemember = document.getElementById('clerkRemember');
     const adminRemember = document.getElementById('adminRemember');
 
-    // ---------- 存储/读取 记住的凭证 (localStorage) ----------
+    // ---------- 存储/读取 记住的凭证 ----------
     const STORAGE_KEY_CLERK = 'mixue_clerk_creds';
     const STORAGE_KEY_ADMIN = 'mixue_admin_creds';
 
@@ -626,7 +611,6 @@
       }
     }
 
-    // 填充存储的凭证到modal (打开时)
     function fillClerkIfStored() {
       const stored = loadStoredClerk();
       if (stored) {
@@ -649,15 +633,11 @@
       }
     }
 
-    // 打开modal时填充
+    // ---------- 打开modal ----------
     document.getElementById('clerkLoginBtn').addEventListener('click', () => {
       fillClerkIfStored();
       clerkModal.classList.add('active');
       clerkError.classList.remove('show');
-      // 如果已经填充，自动聚焦密码或ic
-      if (clerkIc.value && clerkPw.value) {
-        // 可直接登录, 但让用户决定
-      }
       clerkIc.focus();
     });
 
@@ -668,7 +648,7 @@
       adminIc.focus();
     });
 
-    // 关闭
+    // ---------- 关闭modal ----------
     document.getElementById('clerkCancelBtn').addEventListener('click', () => {
       clerkModal.classList.remove('active');
     });
@@ -706,18 +686,34 @@
         }
 
         let found = false;
+        let staffData = null;
         snapshot.forEach(doc => {
           const data = doc.data();
           if (data.password === password) {
             found = true;
+            staffData = {
+              ic: data.ic,
+              name: data.name,
+              position: data.position,
+              outlet_name: data.outlet_name,
+              register_time: data.register_time,
+              join_date: data.join_date || data.register_time
+            };
           }
         });
 
-        if (found) {
-          // 保存记住状态
+        if (found && staffData) {
+          // ✅ 保存登录状态到 sessionStorage
+          sessionStorage.setItem('mixue_logged_in', 'true');
+          sessionStorage.setItem('mixue_staff_data', JSON.stringify(staffData));
+          
+          // ✅ 保存记住凭证
           saveClerkCreds(ic, password, remember);
+          
           clerkModal.classList.remove('active');
-          window.location.href = 'main.html';
+          
+          // ✅ 使用 window.location.replace 防止回退到登录页
+          window.location.replace('main.html');
         } else {
           clerkError.textContent = 'Wrong password';
           clerkError.classList.add('show');
@@ -753,17 +749,27 @@
         }
 
         let found = false;
+        let adminData = null;
         snapshot.forEach(doc => {
           const data = doc.data();
           if (data.password === password) {
             found = true;
+            adminData = {
+              ic: data.ic,
+              name: data.name,
+              outlet_id: data.outlet_id,
+              register_time: data.register_time
+            };
           }
         });
 
-        if (found) {
+        if (found && adminData) {
+          sessionStorage.setItem('mixue_logged_in', 'true');
+          sessionStorage.setItem('mixue_admin_data', JSON.stringify(adminData));
           saveAdminCreds(ic, password, remember);
+          
           adminModal.classList.remove('active');
-          window.location.href = 'admin.html';
+          window.location.replace('admin.html');
         } else {
           adminError.textContent = 'Wrong password';
           adminError.classList.add('show');
@@ -775,7 +781,7 @@
       }
     });
 
-    // Enter key
+    // Enter key support
     clerkIc.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('clerkSubmitBtn').click(); });
     clerkPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('clerkSubmitBtn').click(); });
     adminIc.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('adminSubmitBtn').click(); });
@@ -786,9 +792,6 @@
       e.preventDefault();
       alert('Mixue Policy · Thank you for reading.');
     });
-
-    // 如果已经存储凭证，打开modal时自动填充，用户只需点击登录
-    // 额外: 若两个都存储，可在按钮上显示快速登录提示 (可省略)
   </script>
 </body>
 </html>
