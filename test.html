@@ -6,7 +6,7 @@
   <title>Quiz · Mixue</title>
   <link rel="icon" type="image/png" href="mixue.png" />
   <link rel="apple-touch-icon" href="mixue.png" />
-  <link rel="apple-touch-icon-precomposed" href="mixue.png" />
+  <link rel="apple-touch-icon-precomputed" href="mixue.png" />
   <style>
     * {
       margin: 0;
@@ -31,7 +31,6 @@
       margin: 0 auto;
     }
 
-    /* header with logo + name + score + timer */
     .quiz-header {
       display: flex;
       align-items: center;
@@ -117,7 +116,6 @@
       letter-spacing: 0.3px;
     }
 
-    /* progress */
     .progress-bar {
       width: 100%;
       height: 5px;
@@ -134,7 +132,6 @@
       transition: width 0.35s ease;
     }
 
-    /* quiz card */
     .quiz-card {
       background: white;
       border-radius: 36px;
@@ -297,7 +294,6 @@
       pointer-events: none;
     }
 
-    /* result card */
     .result-card {
       background: white;
       border-radius: 40px;
@@ -424,7 +420,6 @@
 <body>
 <div class="quiz-wrap">
 
-  <!-- header: logo + name + outlet + score + timer -->
   <div class="quiz-header">
     <div class="logo-sm"><img src="mixue.png" alt="Mixue" /></div>
     <div class="header-info">
@@ -443,17 +438,15 @@
     </div>
   </div>
 
-  <!-- progress -->
   <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
 
-  <!-- quiz container -->
   <div id="quizContainer"></div>
 
   <div class="footer-note">mixue · kangar</div>
 </div>
 
 <script>
-  // ---------- RECIPE DATA (full menu, filtered) ----------
+  // ---------- UPDATED RECIPE DATA (奶茶 "to 0.8" → "Full") ----------
   const RECIPES = [
     { name: "Mixue Ice Cream", category: "ICE CREAM", cup: "Ais Cream Cone", steps: ["120 g Ice Cream"] },
     { name: "Strawberry Crispy Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["Waffle Crumbs (2 Scope/14 g)", "5.5 laps Ais Cream (+- 180g)", "Strawberry Jam (2 Scope - 25 g x 2)"] },
@@ -462,14 +455,16 @@
     { name: "Super Mango Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Mango Jam - 40 g (Kena Timbang)"] },
     { name: "Kiwi Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Kiwi Jam - 1 Scope", "Coconut Jelly - 2 Scope"] },
     { name: "Peach Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Peach Jam - 1 Scope", "Crystal Jelly - 2 Scope"] },
-    { name: "Brown Sugar Bubble Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Brown Sugar Syrup (1.5 press = 30g )", "Pearl (2 Scope = 40 g x 2 )", "Milk Tea Until 0.8"] },
-    { name: "Toffee Hazelnut Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Until 0.8", "No Added On Water (New)"] },
-    { name: "O-Coco Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Chocolate (2 Pupl = 40 g)", "Cookies (1 Scope = 10 g)", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Until 0.8"] },
-    { name: "Classical Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (2 Scope)", "Milk Tea Until 0.8"] },
-    { name: "Classical Milk Tea (L)", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (4 Scope)", "Milk Tea Until 0.8"] },
-    { name: "Twin-Topping Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30g", "Nata (2 Scope)", "Brown Sugar Jelly (2 Scope)", "Milk Tea Until 0.8"] },
-    { name: "Twin-Topping Milk Tea (L)", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Nata (3 Scope)", "Brown Sugar Jelly (3 Scope)", "Milk Tea Until 0.8"] },
-    { name: "Super-Triple Milk Tea", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (2 Scope)", "Nata (2 Scope)", "Brown Sugar Jelly (2 Scope)", "Milk Tea Until 0.8"] },
+    // MILK TEA: all "Until 0.8" → "Full"
+    { name: "Brown Sugar Bubble Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Brown Sugar Syrup (1.5 press = 30g )", "Pearl (2 Scope = 40 g x 2 )", "Milk Tea Full"] },
+    { name: "Toffee Hazelnut Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Full", "No Added On Water (New)"] },
+    { name: "O-Coco Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Chocolate (2 Pupl = 40 g)", "Cookies (1 Scope = 10 g)", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Full"] },
+    { name: "Classical Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (2 Scope)", "Milk Tea Full"] },
+    { name: "Classical Milk Tea (L)", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (4 Scope)", "Milk Tea Full"] },
+    { name: "Twin-Topping Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30g", "Nata (2 Scope)", "Brown Sugar Jelly (2 Scope)", "Milk Tea Full"] },
+    { name: "Twin-Topping Milk Tea (L)", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Nata (3 Scope)", "Brown Sugar Jelly (3 Scope)", "Milk Tea Full"] },
+    { name: "Super-Triple Milk Tea", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (2 Scope)", "Nata (2 Scope)", "Brown Sugar Jelly (2 Scope)", "Milk Tea Full"] },
+    // Creamy Drinks: removed "Add Water" steps
     { name: "Strawberry Creamy Drink", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 20 g", "Yellow Jelly (2 Scope 80 g)", "Strawberry Jam 75g (25g x 3)", "Concentrated Milk 60ml"] },
     { name: "Kiwi Creamy Drink", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30 g", "Yellow Jelly (2 Scope 80 g)", "Kiwi Jam 75g (25g x 3)", "Concentrated Milk 60ml"] },
     { name: "Lychee Rose Creamy Drink", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Milk Jelly (2 Scope - 40 g x 2)", "Lychee Syrup 60", "Concentrated Milk 60ml"] },
@@ -477,6 +472,7 @@
     { name: "Toffee Hazelnut Latte", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Concentrated Milk 160ml", "Stir", "Concentrated Coffee 100ml"] },
     { name: "Mango Brulee", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup ( 20 g )", "Egg Puding ( 2 Scope = 80 g )", "Mango Jam (75 g)", "Concentrated Milk ( 60 ml )", "Jasmine Tea ( 80 ml )"] },
     { name: "Toffee Lava Brulee", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 1 Pulp )", "Chocolate (2 Pulp = 40g )", "Egg Puding ( 2 Scope )", "Concentrated Milk ( 100 ml )"] },
+    // REAL FRUIT: removed "Add Ice/Water" steps
     { name: "Grape Taro", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Coconut (2 Scope)", "Taro (2 Scope)", "Grape 90g", "Jasmine Tea 80ml"] },
     { name: "Fresh Punched Orange", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Orange Pomalo Jam (2 Scope)", "Jasmine Tea 100ml"] },
     { name: "Kiwi Jasmine Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Fruit Honey (20 g)", "Coconut (2 Scope)", "Yellow Jelly (1 Scope)", "Kiwi Jam 75g", "Jasmine Tea 120ml"] },
@@ -488,20 +484,23 @@
     { name: "Fresh Squeezed Lemonade", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Lemon 40g - 45 g", "Fruit Honey (55 g)"] },
     { name: "Lemon Jasmine Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Lemon 40g", "Sugar Syrup 30g", "Fruit Honey (40g)", "Jasmine Tea 160ml"] },
     { name: "Lemon Black Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Lemon 40g", "Sugar Syrup 30g", "Fruit Honey (40g)", "Black Tea 120ml"] },
+    // COFFEE: removed "Add Ice" steps
     { name: "Ice Cream Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Syrup 20g", "Brown Sugar Jelly (1 Scope)", "Concentrated Milk 80ml", "Concentrated Coffee 80ml", "2.5 lap Ais Cream (90g)"] },
     { name: "Ice Cream Mocha", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Chocolate (2 press = 40g )", "Brown Sugar Jelly (1 Scope)", "Concentrated Milk 80ml", "Concentrated Coffee 80ml", "2.5 lap Ais Cream (90g)"] },
     { name: "Ice Cream Toffee Hazelnut Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Brown Sugar Jelly ( 1 Scope = 40 g )", "Concentrated Milk 80ml", "Concentrated Coffee 80ml", "2.5 lap Ais Cream (90g)"] },
     { name: "Iced Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Syrup 20g", "Concentrated Milk 180ml", "Stir", "Concentrated Coffee 120ml"] },
     { name: "Brown Sugar Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Brown Sugar Syrup (2 press = 40g )", "Concentrated Milk 160ml", "Concentrated Coffee 100ml"] },
+    // PURE TEA: removed "Add Ice/Water"
     { name: "Pure Black Tea", category: "PURE TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 60g", "Black Tea 160ml"] },
     { name: "Pure Jasmine Tea", category: "PURE TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 60g", "Jasmine Tea 240ml"] },
+    // OTHER: removed "Add Ice/Water"
     { name: "Mint Lemonade", category: "OTHER", cup: "700 Plastic Cup", steps: ["Lemon 40g (No Pound)", "Fruit Honey (50 g)", "Coconut (2 Scope)", "Lemon Mint Syrup (1 Scope)"] },
     { name: "Lemon Mint Cookies Sundae", category: "OTHER", cup: "U Cup", steps: ["5.5 laps Mint Ais Cream", "Cookies (2 Scope = 50g)"] },
     { name: "Taro Bubble Creamy Drink", category: "OTHER", cup: "500 Plastic Cup", steps: ["5.5 laps Taro Ice Cream (170-190g)", "Tap Cup Downward (Line 5)", "Pearl (1 Scope)", "Concentrated Milk ( 60ml )"] },
     { name: "Taro Ice Cream", category: "OTHER", cup: "Cone", steps: ["3.5 laps Taro Ice Cream (110 g - 130 g)", "Ice Cream Shape ( Tall )"] }
   ];
 
-  // ---------- GET STAFF DATA FROM SESSION ----------
+  // ---------- GET STAFF DATA ----------
   function getStaffData() {
     try {
       const raw = sessionStorage.getItem('mixue_staff_data');
@@ -531,11 +530,9 @@
   const staffNameDisplay = document.getElementById('staffNameDisplay');
   const staffOutletDisplay = document.getElementById('staffOutletDisplay');
 
-  // display staff info
   staffNameDisplay.textContent = staff.name;
   staffOutletDisplay.textContent = staff.outlet;
 
-  // Timer
   function startTimer() {
     if (timerInterval) return;
     quizStartTime = Date.now();
@@ -560,7 +557,6 @@
     return `${mins}:${secs}`;
   }
 
-  // Shuffle
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -569,14 +565,13 @@
     return arr;
   }
 
-  // Filter out "Add Ice" and "Add Water" steps globally
-  const FILTER_WORDS = ['add ice', 'add water', 'add full ice', 'add full water', 'add ice to 0.8', 'add water until 0.8', 'add ice until 0.8', 'add water until full', 'add ice until love', 'add ice until love line', 'add ice to 0.8 cm', 'add water until 0.8 cm'];
+  // Filter out "Add Ice" and "Add Water" steps (and variations)
+  const FILTER_WORDS = ['add ice', 'add water', 'add full ice', 'add full water', 'add ice to 0.8', 'add water until 0.8', 'add ice until 0.8', 'add water until full', 'add ice until love', 'add ice until love line', 'add ice to 0.8 cm', 'add water until 0.8 cm', 'add ice to 0.8 cm', 'add water until 0.8 cm'];
   function isFilteredStep(step) {
     const lower = step.toLowerCase();
     return FILTER_WORDS.some(f => lower.includes(f));
   }
 
-  // Build questions
   function buildQuestions(recipes) {
     const allSteps = [];
     recipes.forEach(r => {
@@ -587,9 +582,8 @@
     const uniqueSteps = [...new Set(allSteps)];
 
     return recipes.map((recipe, idx) => {
-      // filter recipe steps
       const filteredSteps = recipe.steps.filter(s => !isFilteredStep(s));
-      if (filteredSteps.length === 0) return null; // skip recipes with no valid steps
+      if (filteredSteps.length === 0) return null;
 
       const correctStep = filteredSteps[Math.floor(Math.random() * filteredSteps.length)];
       
