@@ -6,7 +6,7 @@
   <title>Quiz · Mixue</title>
   <link rel="icon" type="image/png" href="mixue.png" />
   <link rel="apple-touch-icon" href="mixue.png" />
-  <link rel="apple-touch-icon-precomputed" href="mixue.png" />
+  <link rel="apple-touch-icon-precomposed" href="mixue.png" />
   <style>
     * {
       margin: 0;
@@ -395,6 +395,54 @@
       transform: scale(0.97);
     }
 
+    /* Wrong answers review */
+    .wrong-review {
+      margin-top: 20px;
+      border-top: 2px solid #f5eeee;
+      padding-top: 18px;
+    }
+    .wrong-review .wr-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #2d1a1a;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .wrong-review .wr-title .badge {
+      background: #c62828;
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 12px;
+      border-radius: 40px;
+    }
+    .wrong-item {
+      background: #fff5f5;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      border-left: 4px solid #c62828;
+    }
+    .wrong-item .wi-name {
+      font-weight: 700;
+      color: #2d1a1a;
+      font-size: 0.95rem;
+    }
+    .wrong-item .wi-detail {
+      font-size: 0.85rem;
+      color: #5a3a3a;
+      margin-top: 4px;
+    }
+    .wrong-item .wi-detail .correct-answer {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+    .wrong-item .wi-detail .your-answer {
+      color: #c62828;
+      font-weight: 600;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -446,7 +494,7 @@
 </div>
 
 <script>
-  // ---------- UPDATED RECIPE DATA (奶茶 "to 0.8" → "Full") ----------
+  // ---------- UPDATED RECIPE DATA (ALL MILK TEA = "Full" NOT "0.8") ----------
   const RECIPES = [
     { name: "Mixue Ice Cream", category: "ICE CREAM", cup: "Ais Cream Cone", steps: ["120 g Ice Cream"] },
     { name: "Strawberry Crispy Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["Waffle Crumbs (2 Scope/14 g)", "5.5 laps Ais Cream (+- 180g)", "Strawberry Jam (2 Scope - 25 g x 2)"] },
@@ -455,7 +503,7 @@
     { name: "Super Mango Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Mango Jam - 40 g (Kena Timbang)"] },
     { name: "Kiwi Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Kiwi Jam - 1 Scope", "Coconut Jelly - 2 Scope"] },
     { name: "Peach Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Peach Jam - 1 Scope", "Crystal Jelly - 2 Scope"] },
-    // MILK TEA: all "Until 0.8" → "Full"
+    // MILK TEA: ALL "Until 0.8" → "Full" (no 0.8 anywhere)
     { name: "Brown Sugar Bubble Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Brown Sugar Syrup (1.5 press = 30g )", "Pearl (2 Scope = 40 g x 2 )", "Milk Tea Full"] },
     { name: "Toffee Hazelnut Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Full", "No Added On Water (New)"] },
     { name: "O-Coco Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Chocolate (2 Pupl = 40 g)", "Cookies (1 Scope = 10 g)", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Full"] },
@@ -522,6 +570,7 @@
   let quizStartTime = Date.now();
   let timerInterval = null;
   let secondsElapsed = 0;
+  let wrongAnswers = []; // store wrong answers for review
 
   const container = document.getElementById('quizContainer');
   const headerScore = document.getElementById('headerScore');
@@ -610,6 +659,7 @@
     secondsElapsed = 0;
     headerTimer.textContent = '00:00';
     quizStartTime = Date.now();
+    wrongAnswers = [];
 
     const shuffledRecipes = shuffle([...RECIPES]);
     quizQuestions = buildQuestions(shuffledRecipes);
@@ -711,6 +761,14 @@
       el.classList.add('wrong');
       feedback.className = 'feedback show wrong';
       feedback.textContent = `❌ Oops! The correct step was: "${q.correct}"`;
+      // Store wrong answer
+      wrongAnswers.push({
+        name: q.name,
+        category: q.category,
+        cup: q.cup,
+        correct: q.correct,
+        yourAnswer: selectedStep
+      });
     }
 
     answered = true;
@@ -724,6 +782,27 @@
     const timeStr = formatTime(secondsElapsed);
     let emoji = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📖';
     let msg = pct >= 80 ? 'Excellent! You know your recipes!' : pct >= 50 ? 'Good effort! Keep learning.' : 'Review the recipe book and try again.';
+
+    let wrongHtml = '';
+    if (wrongAnswers.length > 0) {
+      wrongHtml = `
+        <div class="wrong-review">
+          <div class="wr-title">
+            📝 Wrong Answers <span class="badge">${wrongAnswers.length}</span>
+          </div>
+          ${wrongAnswers.map(w => `
+            <div class="wrong-item">
+              <div class="wi-name">${w.name} · ${w.category}</div>
+              <div class="wi-detail">
+                Cup: ${w.cup}<br>
+                Your answer: <span class="your-answer">${w.yourAnswer}</span><br>
+                Correct: <span class="correct-answer">${w.correct}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
 
     container.innerHTML = `
       <div class="result-card">
@@ -756,6 +835,7 @@
             <div class="lbl">Time Taken</div>
           </div>
         </div>
+        ${wrongHtml}
         <button class="btn-restart" id="restartBtn">🔄 Try Again</button>
       </div>
     `;
