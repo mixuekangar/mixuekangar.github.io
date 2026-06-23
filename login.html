@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Login · Mixue</title>
+  <!-- favicon & apple touch icon (mixue.png) -->
+  <link rel="icon" type="image/png" href="mixue.png">
+  <link rel="apple-touch-icon" href="mixue.png">
+  <link rel="apple-touch-icon-precomposed" href="mixue.png">
+  <!-- Firebase SDK (modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC9kxE5gJEFtQpR2XSpFseW5NEfT4sqci8",
+      authDomain: "mixuekangar-1b715.firebaseapp.com",
+      projectId: "mixuekangar-1b715",
+      storageBucket: "mixuekangar-1b715.firebasestorage.app",
+      messagingSenderId: "447950303360",
+      appId: "1:447950303360:web:a6758e01e10e009094f665",
+      measurementId: "G-3RW2ZR8P9R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.collection = collection;
+    window.query = query;
+    window.where = where;
+    window.getDocs = getDocs;
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #c62828;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0 24px;
+    }
+
+    /* icon 去背透明叠加 */
+    .brand-icon {
+      width: 110px;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      margin-top: 4px;
+      background: transparent;
+    }
+    .brand-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
+    }
+
+    /* 时钟面板 - 正式欢乐 */
+    .clock-panel {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      padding: 16px 28px;
+      border-radius: 80px;
+      color: #b71c1c;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 36px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 300px;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .time {
+      font-size: 2.4rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      color: #8b1a1a;
+      letter-spacing: 1px;
+    }
+    .date {
+      font-size: 1rem;
+      opacity: 0.8;
+      margin-top: 4px;
+      font-weight: 500;
+      letter-spacing: 0.4px;
+      color: #4a2828;
+    }
+
+    /* 两个大正方形按钮 - 多巴胺配色 */
+    .button-grid {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 28px;
+      align-items: center;
+    }
+
+    /* 店员按钮 - 明亮黄 (多巴胺) */
+    .login-btn-clerk {
+      background: #FDD835; /* 明亮黄 */
+      border: none;
+      border-radius: 36px;
+      padding: 20px 12px;
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3e2a1f;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.15);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      touch-action: manipulation;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 2px solid rgba(255,255,255,0.4);
+      position: relative;
+    }
+    .login-btn-clerk:active {
+      transform: scale(0.95);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    .login-btn-clerk .sub {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #4d351a;
+      margin-top: 6px;
+      letter-spacing: 0.8px;
+      opacity: 0.85;
+    }
+    .login-btn-clerk .deco {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: #5f401f;
+      margin-top: 2px;
+    }
+
+    /* 管理员按钮 - 明亮蓝 (多巴胺) */
+    .login-btn-admin {
+      background: #4FC3F7; /* 明亮蓝 */
+      border: none;
+      border-radius: 36px;
+      padding: 20px 12px;
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0d2b3b;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.15);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      touch-action: manipulation;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 2px solid rgba(255,255,255,0.4);
+      position: relative;
+    }
+    .login-btn-admin:active {
+      transform: scale(0.95);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    .login-btn-admin .sub {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1c3f52;
+      margin-top: 6px;
+      letter-spacing: 0.8px;
+      opacity: 0.85;
+    }
+    .login-btn-admin .deco {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: #1f4560;
+      margin-top: 2px;
+    }
+
+    /* 模态框 - 店员/管理员登录 */
+    .login-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+    .login-modal.active {
+      display: flex;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 48px;
+      padding: 36px 28px 32px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 40px 70px rgba(0,0,0,0.25);
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .modal-card h3 {
+      color: #b71c1c;
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+    .modal-card .subhead {
+      color: #4d2e2e;
+      margin-bottom: 24px;
+      font-size: 1rem;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+    .input-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #3e2a2a;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1.5px solid #ddd;
+      border-radius: 60px;
+      font-size: 1rem;
+      background: #fafafa;
+      transition: border 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .input-group input:focus {
+      border-color: #c62828;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.15);
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .modal-actions button {
+      border: none;
+      padding: 16px;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: #c62828;
+      color: white;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      touch-action: manipulation;
+      letter-spacing: 0.5px;
+    }
+    .modal-actions button:active {
+      background: #a11f1f;
+      transform: scale(0.97);
+    }
+    .modal-actions .cancel-btn {
+      background: #e8e0e0;
+      color: #3d2a2a;
+    }
+    .modal-actions .cancel-btn:active {
+      background: #d0c8c8;
+    }
+    .error-msg {
+      color: #c62828;
+      background: #ffebee;
+      border-radius: 40px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      margin-top: 12px;
+      display: none;
+      font-weight: 500;
+    }
+    .error-msg.show {
+      display: block;
+    }
+
+    /* 底部 - 联系方式 + policy 下划线（不显眼） */
+    .footer-contact {
+      margin-top: 6px;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.85rem;
+      text-align: center;
+      line-height: 1.7;
+      letter-spacing: 0.2px;
+      background: rgba(0,0,0,0.08);
+      padding: 12px 20px;
+      border-radius: 60px;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      width: 100%;
+      max-width: 360px;
+    }
+    .footer-contact a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px dotted rgba(255,255,255,0.3);
+      transition: opacity 0.2s;
+    }
+    .footer-contact a:active {
+      opacity: 0.7;
+    }
+    .footer-contact .policy-link {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.6);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      padding: 2px 4px;
+      background: transparent;
+      transition: color 0.2s;
+    }
+    .footer-contact .policy-link:active {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* 小屏微调 */
+    @media (max-width: 380px) {
+      .login-btn-clerk, .login-btn-admin {
+        font-size: 1.7rem;
+        padding: 16px 8px;
+      }
+      .time {
+        font-size: 2rem;
+      }
+      .brand-icon {
+        width: 90px;
+        height: 90px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Brand icon (transparent bg) -->
+    <div class="brand-icon">
+      <img src="mixue.png" alt="Mixue" width="110" height="110">
+    </div>
+
+    <!-- Clock + Date -->
+    <div class="clock-panel">
+      <div class="time" id="liveTime">00:00:00</div>
+      <div class="date" id="liveDate">Monday, 1 January 2026</div>
+    </div>
+
+    <!-- Two square buttons with dopamine colors -->
+    <div class="button-grid">
+      <button class="login-btn-clerk" id="clerkLoginBtn">
+        STAFF
+        <span class="sub">店员登录</span>
+        <span class="deco">• • •</span>
+      </button>
+      <button class="login-btn-admin" id="adminLoginBtn">
+        ADMIN
+        <span class="sub">管理员登录</span>
+        <span class="deco">• • •</span>
+      </button>
+    </div>
+
+    <!-- Footer: contacts + policy link (understated) -->
+    <div class="footer-contact">
+      <div>
+        <a href="tel:+601153789909">+60 1153789909</a> &nbsp;·&nbsp; 
+        <a href="mailto:mixuekangar@gmail.com">mixuekangar@gmail.com</a>
+      </div>
+      <div style="font-size:0.75rem; opacity:0.7; margin-top:2px;">
+        zijunedu0108@gmail.com
+      </div>
+      <div style="margin-top: 6px;">
+        <a href="#" class="policy-link" id="policyLink">Read our policy</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clerk Login Modal -->
+  <div class="login-modal" id="clerkModal">
+    <div class="modal-card">
+      <h3>STAFF</h3>
+      <div class="subhead">Enter IC &amp; password</div>
+      <div class="input-group">
+        <label>IC Number</label>
+        <input type="text" id="clerkIc" placeholder="070108020147" inputmode="numeric">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="clerkPassword" placeholder="••••••">
+      </div>
+      <div class="error-msg" id="clerkError">Invalid IC or password</div>
+      <div class="modal-actions">
+        <button id="clerkSubmitBtn">Login</button>
+        <button class="cancel-btn" id="clerkCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="login-modal" id="adminModal">
+    <div class="modal-card">
+      <h3>ADMIN</h3>
+      <div class="subhead">Admin verification</div>
+      <div class="input-group">
+        <label>IC Number</label>
+        <input type="text" id="adminIc" placeholder="Admin IC" inputmode="numeric">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="adminPassword" placeholder="••••••">
+      </div>
+      <div class="error-msg" id="adminError">Invalid IC or password</div>
+      <div class="modal-actions">
+        <button id="adminSubmitBtn">Login</button>
+        <button class="cancel-btn" id="adminCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // ---------- Live Clock ----------
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('liveTime').textContent = `${h}:${m}:${s}`;
+      
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('liveDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ---------- DOM refs ----------
+    const clerkModal = document.getElementById('clerkModal');
+    const adminModal = document.getElementById('adminModal');
+    const clerkIc = document.getElementById('clerkIc');
+    const clerkPw = document.getElementById('clerkPassword');
+    const adminIc = document.getElementById('adminIc');
+    const adminPw = document.getElementById('adminPassword');
+    const clerkError = document.getElementById('clerkError');
+    const adminError = document.getElementById('adminError');
+
+    // Open modals
+    document.getElementById('clerkLoginBtn').addEventListener('click', () => {
+      clerkModal.classList.add('active');
+      clerkError.classList.remove('show');
+      clerkIc.value = '';
+      clerkPw.value = '';
+      clerkIc.focus();
+    });
+
+    document.getElementById('adminLoginBtn').addEventListener('click', () => {
+      adminModal.classList.add('active');
+      adminError.classList.remove('show');
+      adminIc.value = '';
+      adminPw.value = '';
+      adminIc.focus();
+    });
+
+    // Close modals
+    document.getElementById('clerkCancelBtn').addEventListener('click', () => {
+      clerkModal.classList.remove('active');
+    });
+    document.getElementById('adminCancelBtn').addEventListener('click', () => {
+      adminModal.classList.remove('active');
+    });
+    clerkModal.addEventListener('click', (e) => {
+      if (e.target === clerkModal) clerkModal.classList.remove('active');
+    });
+    adminModal.addEventListener('click', (e) => {
+      if (e.target === adminModal) adminModal.classList.remove('active');
+    });
+
+    // ---------- Clerk Login (Firestore staffs) ----------
+    document.getElementById('clerkSubmitBtn').addEventListener('click', async () => {
+      const ic = clerkIc.value.trim();
+      const password = clerkPw.value.trim();
+      if (!ic || !password) {
+        clerkError.textContent = 'Please fill in IC and password';
+        clerkError.classList.add('show');
+        return;
+      }
+
+      try {
+        const staffsRef = collection(window.db, 'staffs');
+        const q = query(staffsRef, where('ic', '==', ic));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          clerkError.textContent = 'IC not registered';
+          clerkError.classList.add('show');
+          return;
+        }
+
+        let found = false;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.password === password) {
+            found = true;
+          }
+        });
+
+        if (found) {
+          clerkModal.classList.remove('active');
+          window.location.href = 'main.html';
+        } else {
+          clerkError.textContent = 'Wrong password';
+          clerkError.classList.add('show');
+        }
+      } catch (err) {
+        console.error(err);
+        clerkError.textContent = 'System error, please retry';
+        clerkError.classList.add('show');
+      }
+    });
+
+    // ---------- Admin Login (Firestore managers) ----------
+    document.getElementById('adminSubmitBtn').addEventListener('click', async () => {
+      const ic = adminIc.value.trim();
+      const password = adminPw.value.trim();
+      if (!ic || !password) {
+        adminError.textContent = 'Please fill in IC and password';
+        adminError.classList.add('show');
+        return;
+      }
+
+      try {
+        const managersRef = collection(window.db, 'managers');
+        const q = query(managersRef, where('ic', '==', ic));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          adminError.textContent = 'IC not registered as admin';
+          adminError.classList.add('show');
+          return;
+        }
+
+        let found = false;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.password === password) {
+            found = true;
+          }
+        });
+
+        if (found) {
+          adminModal.classList.remove('active');
+          window.location.href = 'admin.html';
+        } else {
+          adminError.textContent = 'Wrong password';
+          adminError.classList.add('show');
+        }
+      } catch (err) {
+        console.error(err);
+        adminError.textContent = 'System error, please retry';
+        adminError.classList.add('show');
+      }
+    });
+
+    // Enter key support
+    clerkIc.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('clerkSubmitBtn').click(); });
+    clerkPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('clerkSubmitBtn').click(); });
+    adminIc.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('adminSubmitBtn').click(); });
+    adminPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('adminSubmitBtn').click(); });
+
+    // Policy link (demo)
+    document.getElementById('policyLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Mixue Policy · Thank you for reading.');
+    });
+  </script>
+</body>
+</html>
