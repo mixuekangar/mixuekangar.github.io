@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Main · Mixue</title>
+  <!-- favicon & apple touch icon (mixue.png) -->
+  <link rel="icon" type="image/png" href="mixue.png">
+  <link rel="apple-touch-icon" href="mixue.png">
+  <link rel="apple-touch-icon-precomposed" href="mixue.png">
+  <!-- Firebase SDK (modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+    import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC9kxE5gJEFtQpR2XSpFseW5NEfT4sqci8",
+      authDomain: "mixuekangar-1b715.firebaseapp.com",
+      projectId: "mixuekangar-1b715",
+      storageBucket: "mixuekangar-1b715.firebasestorage.app",
+      messagingSenderId: "447950303360",
+      appId: "1:447950303360:web:a6758e01e10e009094f665",
+      measurementId: "G-3RW2ZR8P9R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.collection = collection;
+    window.query = query;
+    window.where = where;
+    window.getDocs = getDocs;
+    window.doc = doc;
+    window.getDoc = getDoc;
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #c62828;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 30px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 64px;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    /* ---- 左上角头像 + 信息卡片 ---- */
+    .profile-card {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 40px;
+      padding: 24px 22px 22px;
+      margin-bottom: 32px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    /* 圆形头像 - 白色边框 */
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+      background: #f5e6d3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background-color: #fff;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .profile-info {
+      flex: 1;
+      min-width: 140px;
+    }
+    .profile-info .name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d1a1a;
+      letter-spacing: 0.3px;
+      line-height: 1.2;
+    }
+    .profile-info .ic {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #4d2e2e;
+      opacity: 0.8;
+      margin-top: 2px;
+      letter-spacing: 0.3px;
+    }
+    .profile-info .detail-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: #3d2a2a;
+      font-weight: 500;
+    }
+    .profile-info .detail-row span {
+      opacity: 0.75;
+      background: rgba(198, 40, 40, 0.06);
+      padding: 2px 12px;
+      border-radius: 30px;
+      border: 1px solid rgba(198,40,40,0.08);
+    }
+    .profile-info .detail-row .label {
+      opacity: 0.6;
+      font-weight: 400;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    /* ---- 两个大按钮 (多巴胺配色) ---- */
+    .button-grid {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    /* 按钮1: 饮料配方 - 明亮珊瑚/橙 (多巴胺) */
+    .btn-recipe {
+      background: #FF8A65; /* 珊瑚橙 */
+      border: none;
+      border-radius: 36px;
+      padding: 22px 12px;
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2d1a0e;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.15);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      touch-action: manipulation;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    .btn-recipe:active {
+      transform: scale(0.95);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    .btn-recipe .sub {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #3f2416;
+      margin-top: 6px;
+      letter-spacing: 0.8px;
+      opacity: 0.85;
+    }
+    .btn-recipe .deco {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: #5a3421;
+      margin-top: 2px;
+    }
+
+    /* 按钮2: 饮料测验 - 明亮薄荷/绿 (多巴胺) */
+    .btn-test {
+      background: #81C784; /* 薄荷绿 */
+      border: none;
+      border-radius: 36px;
+      padding: 22px 12px;
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a3a1a;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.15);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      touch-action: manipulation;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    .btn-test:active {
+      transform: scale(0.95);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    .btn-test .sub {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #1f4721;
+      margin-top: 6px;
+      letter-spacing: 0.8px;
+      opacity: 0.85;
+    }
+    .btn-test .deco {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: #2a542c;
+      margin-top: 2px;
+    }
+
+    /* 底部简单占位 */
+    .footer-spacer {
+      margin-top: 20px;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* 未登录保护提示 (极简) */
+    .error-banner {
+      background: rgba(255,215,0,0.15);
+      color: #fff3cd;
+      padding: 10px 16px;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      text-align: center;
+      border: 1px solid rgba(255,215,0,0.2);
+      display: none;
+      width: 100%;
+    }
+
+    @media (max-width: 380px) {
+      .btn-recipe, .btn-test {
+        font-size: 1.7rem;
+        padding: 16px 8px;
+      }
+      .profile-card {
+        padding: 18px 16px;
+      }
+      .avatar {
+        width: 68px;
+        height: 68px;
+      }
+      .profile-info .name {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- 未登录提示 (默认隐藏) -->
+    <div class="error-banner" id="loginGuardBanner">⚠️ Please login first</div>
+
+    <!-- 左上角信息卡片: 圆形头像 + 名字/IC/职位/入职日期 -->
+    <div class="profile-card" id="profileCard">
+      <div class="avatar" id="avatarContainer">
+        <img src="mixue.png" alt="Mixue" id="avatarImg">
+      </div>
+      <div class="profile-info">
+        <div class="name" id="displayName">Staff Name</div>
+        <div class="ic" id="displayIc">IC: —</div>
+        <div class="detail-row">
+          <span id="displayPosition">Position</span>
+          <span id="displayJoinDate">Joined: —</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 两个多巴胺按钮 -->
+    <div class="button-grid">
+      <button class="btn-recipe" id="recipeBtn">
+        RECIPE
+        <span class="sub">饮料配方</span>
+        <span class="deco">• • •</span>
+      </button>
+      <button class="btn-test" id="testBtn">
+        QUIZ
+        <span class="sub">饮料测验</span>
+        <span class="deco">• • •</span>
+      </button>
+    </div>
+
+    <div class="footer-spacer">mixue · kangar</div>
+  </div>
+
+  <script type="module">
+    // ---------- 登录保护: 如果未经过login直接进入，跳转回login ----------
+    // 利用 sessionStorage 标记登录状态 (由 login.html 在成功时设置)
+    // 同时也检查是否有员工信息存储 (staffData)
+    const loginFlag = sessionStorage.getItem('mixue_logged_in');
+    const staffDataRaw = sessionStorage.getItem('mixue_staff_data');
+
+    if (!loginFlag || !staffDataRaw) {
+      // 未登录，跳转回 login.html
+      window.location.href = 'login.html';
+    }
+
+    // 解析员工数据
+    let staff = null;
+    try {
+      staff = JSON.parse(staffDataRaw);
+    } catch {
+      window.location.href = 'login.html';
+    }
+
+    if (!staff || !staff.ic) {
+      window.location.href = 'login.html';
+    }
+
+    // ---------- 显示员工信息 ----------
+    document.getElementById('displayName').textContent = staff.name || 'Staff';
+    document.getElementById('displayIc').textContent = `IC: ${staff.ic || '—'}`;
+    document.getElementById('displayPosition').textContent = staff.position || 'Position';
+    // 入职日期: 从register_time 或 直接使用 staff.join_date 若存在
+    let joinDate = staff.join_date || staff.register_time || '';
+    if (joinDate) {
+      try {
+        // 如果时间戳对象, 尝试格式化
+        if (typeof joinDate === 'object' && joinDate.seconds) {
+          const d = new Date(joinDate.seconds * 1000);
+          joinDate = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        } else if (typeof joinDate === 'string') {
+          // 尝试解析
+          const d = new Date(joinDate);
+          if (!isNaN(d)) {
+            joinDate = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+          }
+        }
+      } catch { /* keep original */ }
+    } else {
+      joinDate = '—';
+    }
+    document.getElementById('displayJoinDate').textContent = `Joined: ${joinDate}`;
+
+    // 头像默认使用 mixue.png (已在img中)
+
+    // ---------- 按钮跳转 ----------
+    document.getElementById('recipeBtn').addEventListener('click', () => {
+      window.location.href = 'recipe.html';
+    });
+
+    document.getElementById('testBtn').addEventListener('click', () => {
+      window.location.href = 'test.html';
+    });
+
+    // ---------- 额外的保护: 如果sessionStorage被清空, 重定向 ----------
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'mixue_logged_in' && !e.newValue) {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // 可选: 如果用户手动输入main.html但无session, 上面已经拦截。
+    console.log('✅ Main page loaded for staff:', staff.name);
+
+    // ---------- 补充: 如果还想从Firestore实时拉取最新信息(可选) 但这里为了轻量 直接用session ----------
+    // 但可添加一个刷新按钮或自动更新 (本设计暂略)
+  </script>
+</body>
+</html>
