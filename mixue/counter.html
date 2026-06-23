@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIXUE Calling System - Keypad Console</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; 
+            background: #f8f9fa; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; /* ✨ 核心改动：让所有内容在屏幕垂直方向完美居中 */
+            padding: 20px;
+        }
+
+        /* Keyboard Main Wrapper - Controls overall structure */
+        .main-wrapper {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Brand Logo - Centered Header with Circular Mask and Border */
+        .brand-header {
+            margin-bottom: 20px; /* 移除 margin-top，改用平稳的下边距 */
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .brand-header img {
+            width: 85px;          
+            height: 85px;         
+            object-fit: cover;    
+            border-radius: 50%;   
+            border: 3px solid #ff0033; 
+            box-shadow: 0 4px 10px rgba(255, 0, 51, 0.15); 
+        }
+
+        /* Main Controller Container */
+        .console-container { 
+            background: white; 
+            width: 100%;
+            padding: 20px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06); 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Ticket Display Monitor Area */
+        .display-monitor {
+            background: #fff5f6;
+            border: 2px solid #ffccd5;
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .display-monitor .current-val {
+            font-size: 42px;
+            font-weight: 800;
+            color: #ff0033;
+            letter-spacing: 2px;
+        }
+        .display-monitor .placeholder {
+            color: #ffa3b1;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Dedicated Custom Grid Keypad */
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        /* Generic Keypad Button Style */
+        .key-btn {
+            background: #f1f3f5;
+            border: none;
+            color: #212529;
+            font-size: 30px;
+            font-weight: 700;
+            padding: 18px 0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .key-btn:active {
+            background: #e2e6ea;
+            transform: scale(0.96);
+        }
+
+        /* Special Operations Utility Button (Clear/Backspace) */
+        .key-btn.action-clear {
+            background: #e9ecef;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.2;
+            padding: 10px 5px;
+        }
+        .key-btn.action-clear:active {
+            background: #dee2e6;
+        }
+        
+        /* Specific styling for the function clear text */
+        .key-btn.action-remove {
+            background: #6c757d;
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .key-btn.action-remove:active {
+            background: #5a6268;
+        }
+
+        /* Giant Signature CALL ENTER Key Block */
+        .key-btn.action-enter {
+            grid-column: span 3; 
+            background: #ff0033;
+            color: white;
+            font-size: 24px;
+            font-weight: 800;
+            margin-top: 8px;
+            padding: 20px 0;
+            box-shadow: 0 6px 15px rgba(255, 0, 51, 0.25);
+            letter-spacing: 1px;
+            border-radius: 16px;
+        }
+        .key-btn.action-enter:active {
+            background: #cc0029;
+            box-shadow: 0 2px 5px rgba(255, 0, 51, 0.2);
+        }
+
+        /* Global Database Reset Utility Link */
+        .system-reset-link {
+            margin-top: 25px; /* 稍微拉开一点距离 */
+            color: #adb5bd;
+            font-size: 13px;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        
+        <div class="brand-header">
+            <img src="/mixue.png" alt="MIXUE Logo">
+        </div>
+
+        <div class="console-container">
+            <div class="display-monitor">
+                <div id="monitorContent" class="placeholder">Enter Ticket Number</div>
+            </div>
+            
+            <div class="keypad-grid">
+                <button class="key-btn" onclick="pressNum('1')">1</button>
+                <button class="key-btn" onclick="pressNum('2')">2</button>
+                <button class="key-btn" onclick="pressNum('3')">3</button>
+                
+                <button class="key-btn" onclick="pressNum('4')">4</button>
+                <button class="key-btn" onclick="pressNum('5')">5</button>
+                <button class="key-btn" onclick="pressNum('6')">6</button>
+                
+                <button class="key-btn" onclick="pressNum('7')">7</button>
+                <button class="key-btn" onclick="pressNum('8')">8</button>
+                <button class="key-btn" onclick="pressNum('9')">9</button>
+                
+                <button class="key-btn action-clear action-remove" onclick="removeReadyOrder()">REMOVE<br>READY</button>
+                <button class="key-btn" onclick="pressNum('0')">0</button>
+                <button class="key-btn action-clear" onclick="backspaceInput()">⌫</button>
+                
+                <button class="key-btn action-enter" onclick="completeOrder()">📢 CALL ENTER</button>
+            </div>
+        </div>
+
+        <div class="system-reset-link" onclick="clearAllOrders()">Wipe All System Records</div>
+        
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ogjgdxzhbjikmxkgbxjg.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_zjtgnzjDRN7dfU3AAXqx0w_GA10b7iO';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentInputStr = "";
+
+        function updateMonitor() {
+            const monitor = document.getElementById('monitorContent');
+            if (currentInputStr === "") {
+                monitor.className = "placeholder";
+                monitor.innerText = "Enter Ticket Number";
+            } else {
+                monitor.className = "current-val";
+                monitor.innerText = currentInputStr;
+            }
+        }
+
+        function pressNum(num) {
+            if (currentInputStr.length >= 5) return; 
+            currentInputStr += num;
+            updateMonitor();
+        }
+
+        function clearInput() {
+            currentInputStr = "";
+            updateMonitor();
+        }
+
+        function backspaceInput() {
+            currentInputStr = currentInputStr.slice(0, -1);
+            updateMonitor();
+        }
+
+        async function completeOrder() {
+            const num = currentInputStr.trim();
+            if (!num) return;
+
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'ready' })
+                .eq('order_num', num)
+                .eq('status', 'preparing');
+
+            if (error) {
+                console.error('Database exception:', error);
+                alert("Transmission failed!");
+            } else {
+                clearInput();
+            }
+        }
+
+        async function removeReadyOrder() {
+            const num = currentInputStr.trim();
+            if (!num) return;
+
+            const { error } = await supabaseClient
+                .from('orders')
+                .delete()
+                .eq('order_num', num);
+
+            if (error) {
+                console.error('Database delete exception:', error);
+                alert("Remove operation failed!");
+            } else {
+                clearInput();
+            }
+        }
+
+        async function clearAllOrders() {
+            if (confirm("Are you sure you want to completely flush out the board records?")) {
+                const { error } = await supabaseClient
+                    .from('orders')
+                    .delete()
+                    .neq('id', 0); 
+                
+                if (error) {
+                    alert("Wipe action rejected!");
+                } else {
+                    clearInput();
+                    alert("System cache cleaned!");
+                }
+            }
+        }
+    </script>
+</body>
+</html>
