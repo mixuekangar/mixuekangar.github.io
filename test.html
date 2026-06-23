@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+  <title>Quiz · Mixue</title>
+  <link rel="icon" type="image/png" href="mixue.png" />
+  <link rel="apple-touch-icon" href="mixue.png" />
+  <link rel="apple-touch-icon-precomposed" href="mixue.png" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #c62828;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px 12px 40px;
+      margin: 0;
+    }
+
+    .quiz-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* header with logo + name + score + timer */
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      padding: 12px 16px;
+      border-radius: 60px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255,255,255,0.15);
+      flex-wrap: wrap;
+    }
+    .quiz-header .logo-sm {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+      overflow: hidden;
+    }
+    .quiz-header .logo-sm img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+      display: block;
+    }
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 8px 16px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .header-info .staff-name {
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+      background: rgba(255,255,255,0.12);
+      padding: 4px 14px;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .header-info .staff-outlet {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-left: auto;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .header-stats .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.08);
+      padding: 4px 12px;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .header-stats .stat-item .num {
+      font-weight: 700;
+      font-size: 1rem;
+      min-width: 20px;
+      text-align: center;
+    }
+    .header-stats .stat-item .label {
+      opacity: 0.6;
+      font-weight: 400;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* progress */
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: rgba(255,255,255,0.20);
+      border-radius: 10px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      width: 0%;
+      background: #FDD835;
+      border-radius: 10px;
+      transition: width 0.35s ease;
+    }
+
+    /* quiz card */
+    .quiz-card {
+      background: white;
+      border-radius: 36px;
+      padding: 24px 20px 28px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.20);
+    }
+
+    .q-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #7a4a4a;
+      letter-spacing: 0.3px;
+    }
+    .q-meta .cat {
+      background: #f5e6e6;
+      padding: 3px 14px;
+      border-radius: 40px;
+      color: #a14343;
+      font-size: 0.75rem;
+    }
+    .q-meta .num {
+      opacity: 0.6;
+    }
+
+    .q-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #2d1a1a;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .q-cup {
+      font-size: 0.85rem;
+      color: #5a3a3a;
+      background: #f8f0f0;
+      display: inline-block;
+      padding: 3px 16px;
+      border-radius: 40px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .step-option {
+      background: #f9f6f6;
+      border-radius: 18px;
+      padding: 12px 16px;
+      border: 2px solid transparent;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      touch-action: manipulation;
+      font-size: 0.9rem;
+      color: #2d1a1a;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .step-option:active {
+      transform: scale(0.97);
+    }
+    .step-option .idx {
+      background: #e8e0e0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #4d2e2e;
+      flex-shrink: 0;
+    }
+    .step-option.correct {
+      border-color: #4CAF50;
+      background: #e8f5e9;
+    }
+    .step-option.correct .idx {
+      background: #4CAF50;
+      color: white;
+    }
+    .step-option.wrong {
+      border-color: #e53935;
+      background: #ffebee;
+    }
+    .step-option.wrong .idx {
+      background: #e53935;
+      color: white;
+    }
+    .step-option.disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .step-option.reveal-correct {
+      border-color: #4CAF50;
+      background: #e8f5e9;
+    }
+    .step-option.reveal-correct .idx {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: none;
+      text-align: center;
+    }
+    .feedback.show {
+      display: block;
+    }
+    .feedback.correct {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .feedback.wrong {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .btn-next {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 60px;
+      background: #c62828;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      touch-action: manipulation;
+      letter-spacing: 0.5px;
+      margin-top: 6px;
+      box-shadow: 0 6px 20px rgba(198,40,40,0.25);
+    }
+    .btn-next:active {
+      transform: scale(0.97);
+      background: #a11f1f;
+    }
+    .btn-next:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* result card */
+    .result-card {
+      background: white;
+      border-radius: 40px;
+      padding: 32px 24px 36px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.20);
+    }
+    .result-card .result-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f5eeee;
+      flex-wrap: wrap;
+    }
+    .result-card .result-header .logo-sm {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #f5eeee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .result-card .result-header .logo-sm img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+    }
+    .result-card .result-header .rh-info {
+      flex: 1;
+    }
+    .result-card .result-header .rh-info .name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2d1a1a;
+    }
+    .result-card .result-header .rh-info .outlet {
+      font-size: 0.85rem;
+      color: #5a3a3a;
+      opacity: 0.7;
+    }
+    .result-card .result-header .rh-score {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #c62828;
+      line-height: 1;
+    }
+    .result-card .result-header .rh-score .denom {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #7a4a4a;
+    }
+
+    .result-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0 20px;
+    }
+    .result-details .rd-item {
+      background: #f9f6f6;
+      border-radius: 20px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .result-details .rd-item .val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2d1a1a;
+    }
+    .result-details .rd-item .lbl {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: #7a4a4a;
+      letter-spacing: 0.3px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .result-card .btn-restart {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 60px;
+      background: #c62828;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+      box-shadow: 0 6px 20px rgba(198,40,40,0.20);
+      margin-top: 8px;
+    }
+    .result-card .btn-restart:active {
+      transform: scale(0.97);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: rgba(255,255,255,0.20);
+      font-size: 0.65rem;
+      letter-spacing: 0.5px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 400px) {
+      .quiz-card { padding: 18px 14px 22px; }
+      .q-name { font-size: 1.2rem; }
+      .step-option { font-size: 0.82rem; padding: 10px 12px; }
+      .header-stats .stat-item { padding: 2px 8px; font-size: 0.75rem; }
+      .header-info .staff-name { font-size: 0.8rem; padding: 2px 10px; }
+      .result-details { grid-template-columns: 1fr 1fr; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+<div class="quiz-wrap">
+
+  <!-- header: logo + name + outlet + score + timer -->
+  <div class="quiz-header">
+    <div class="logo-sm"><img src="mixue.png" alt="Mixue" /></div>
+    <div class="header-info">
+      <span class="staff-name" id="staffNameDisplay">Staff</span>
+      <span class="staff-outlet" id="staffOutletDisplay">Outlet</span>
+    </div>
+    <div class="header-stats">
+      <span class="stat-item">
+        <span class="label">Score</span>
+        <span class="num" id="headerScore">0</span>
+      </span>
+      <span class="stat-item">
+        <span class="label">⏱</span>
+        <span class="num" id="headerTimer">00:00</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- progress -->
+  <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+
+  <!-- quiz container -->
+  <div id="quizContainer"></div>
+
+  <div class="footer-note">mixue · kangar</div>
+</div>
+
+<script>
+  // ---------- RECIPE DATA (full menu, filtered) ----------
+  const RECIPES = [
+    { name: "Mixue Ice Cream", category: "ICE CREAM", cup: "Ais Cream Cone", steps: ["120 g Ice Cream"] },
+    { name: "Strawberry Crispy Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["Waffle Crumbs (2 Scope/14 g)", "5.5 laps Ais Cream (+- 180g)", "Strawberry Jam (2 Scope - 25 g x 2)"] },
+    { name: "Super Boba Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["Brown Sugar Syrup (0.5 press- 10 g)", "5.5 laps Ais Cream (+- 180g)", "Pearl (2 Scope = 40 g x 2)"] },
+    { name: "O-Crispy Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["Waffle Crumbs (2 Scope/14 g)", "5.5 laps Ais Cream (+- 180g)", "Chocolate (1 Pupl = 20 g)", "Cookies (2 Scope = 2 x 25 g)"] },
+    { name: "Super Mango Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Mango Jam - 40 g (Kena Timbang)"] },
+    { name: "Kiwi Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Kiwi Jam - 1 Scope", "Coconut Jelly - 2 Scope"] },
+    { name: "Peach Sundae", category: "ICE CREAM", cup: "U Cup", steps: ["5.5 laps Ais Cream (+- 180g)", "Peach Jam - 1 Scope", "Crystal Jelly - 2 Scope"] },
+    { name: "Brown Sugar Bubble Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Brown Sugar Syrup (1.5 press = 30g )", "Pearl (2 Scope = 40 g x 2 )", "Milk Tea Until 0.8"] },
+    { name: "Toffee Hazelnut Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Until 0.8", "No Added On Water (New)"] },
+    { name: "O-Coco Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Chocolate (2 Pupl = 40 g)", "Cookies (1 Scope = 10 g)", "Brown Sugar Jelly (80 g = 40 g x 2)", "Milk Tea Until 0.8"] },
+    { name: "Classical Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (2 Scope)", "Milk Tea Until 0.8"] },
+    { name: "Classical Milk Tea (L)", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (4 Scope)", "Milk Tea Until 0.8"] },
+    { name: "Twin-Topping Milk Tea", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30g", "Nata (2 Scope)", "Brown Sugar Jelly (2 Scope)", "Milk Tea Until 0.8"] },
+    { name: "Twin-Topping Milk Tea (L)", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Nata (3 Scope)", "Brown Sugar Jelly (3 Scope)", "Milk Tea Until 0.8"] },
+    { name: "Super-Triple Milk Tea", category: "MILK TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 30g", "Pearl (2 Scope)", "Nata (2 Scope)", "Brown Sugar Jelly (2 Scope)", "Milk Tea Until 0.8"] },
+    { name: "Strawberry Creamy Drink", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 20 g", "Yellow Jelly (2 Scope 80 g)", "Strawberry Jam 75g (25g x 3)", "Concentrated Milk 60ml"] },
+    { name: "Kiwi Creamy Drink", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 30 g", "Yellow Jelly (2 Scope 80 g)", "Kiwi Jam 75g (25g x 3)", "Concentrated Milk 60ml"] },
+    { name: "Lychee Rose Creamy Drink", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Milk Jelly (2 Scope - 40 g x 2)", "Lychee Syrup 60", "Concentrated Milk 60ml"] },
+    { name: "Melon Creamy Drink", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Milk Jelly (1 Scope)", "Crystal Jelly (2 Scope)", "Melon Syrup (2 Scope - 50g)", "Concentrated Milk 60ml"] },
+    { name: "Toffee Hazelnut Latte", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Concentrated Milk 160ml", "Stir", "Concentrated Coffee 100ml"] },
+    { name: "Mango Brulee", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Syrup ( 20 g )", "Egg Puding ( 2 Scope = 80 g )", "Mango Jam (75 g)", "Concentrated Milk ( 60 ml )", "Jasmine Tea ( 80 ml )"] },
+    { name: "Toffee Lava Brulee", category: "MILK TEA", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 1 Pulp )", "Chocolate (2 Pulp = 40g )", "Egg Puding ( 2 Scope )", "Concentrated Milk ( 100 ml )"] },
+    { name: "Grape Taro", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Coconut (2 Scope)", "Taro (2 Scope)", "Grape 90g", "Jasmine Tea 80ml"] },
+    { name: "Fresh Punched Orange", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Orange Pomalo Jam (2 Scope)", "Jasmine Tea 100ml"] },
+    { name: "Kiwi Jasmine Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Fruit Honey (20 g)", "Coconut (2 Scope)", "Yellow Jelly (1 Scope)", "Kiwi Jam 75g", "Jasmine Tea 120ml"] },
+    { name: "Strawberry Peach", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Crystal Jelly (2 Scope)", "Strawberry Jam (3 Scope)", "Peach Jam (1 Scope)", "Jasmine Tea 120ml"] },
+    { name: "Strawberry Bobo", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Lemon 40g (No Pound)", "Sugar Syrup 40g", "Crystal Jelly (2 Scope)", "Strawberry Jam (4 Scope)", "Jasmine Tea 120ml"] },
+    { name: "Peach Black Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Yellow Peach Jam (4 Scope)", "Yellow Jelly (3 Scope)", "Black Tea 100ml"] },
+    { name: "Peach Jasmine Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Sugar Syrup 40g", "Pink Peach Jam (3 Scope)", "Yellow Jelly (3 Scope)", "Jasmine Tea 100ml"] },
+    { name: "Creamy Mango Boba", category: "REAL FRUIT", cup: "500 Plastic Cup", steps: ["3.5 lap Ais Cream", "Mango Jam (3 Scope)", "Yellow Jelly (1 Scope)", "Pearl (1 Scope)", "Coconut (1 Scope)"] },
+    { name: "Fresh Squeezed Lemonade", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Lemon 40g - 45 g", "Fruit Honey (55 g)"] },
+    { name: "Lemon Jasmine Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Lemon 40g", "Sugar Syrup 30g", "Fruit Honey (40g)", "Jasmine Tea 160ml"] },
+    { name: "Lemon Black Tea", category: "REAL FRUIT", cup: "700 Plastic Cup", steps: ["Lemon 40g", "Sugar Syrup 30g", "Fruit Honey (40g)", "Black Tea 120ml"] },
+    { name: "Ice Cream Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Syrup 20g", "Brown Sugar Jelly (1 Scope)", "Concentrated Milk 80ml", "Concentrated Coffee 80ml", "2.5 lap Ais Cream (90g)"] },
+    { name: "Ice Cream Mocha", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Syrup 10g", "Chocolate (2 press = 40g )", "Brown Sugar Jelly (1 Scope)", "Concentrated Milk 80ml", "Concentrated Coffee 80ml", "2.5 lap Ais Cream (90g)"] },
+    { name: "Ice Cream Toffee Hazelnut Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Flavoured Drink ( 2 press - 40 g )", "Brown Sugar Jelly ( 1 Scope = 40 g )", "Concentrated Milk 80ml", "Concentrated Coffee 80ml", "2.5 lap Ais Cream (90g)"] },
+    { name: "Iced Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Sugar Syrup 20g", "Concentrated Milk 180ml", "Stir", "Concentrated Coffee 120ml"] },
+    { name: "Brown Sugar Latte", category: "COFFEE", cup: "500 Plastic Cup", steps: ["Brown Sugar Syrup (2 press = 40g )", "Concentrated Milk 160ml", "Concentrated Coffee 100ml"] },
+    { name: "Pure Black Tea", category: "PURE TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 60g", "Black Tea 160ml"] },
+    { name: "Pure Jasmine Tea", category: "PURE TEA", cup: "700 Plastic Cup", steps: ["Sugar Syrup 60g", "Jasmine Tea 240ml"] },
+    { name: "Mint Lemonade", category: "OTHER", cup: "700 Plastic Cup", steps: ["Lemon 40g (No Pound)", "Fruit Honey (50 g)", "Coconut (2 Scope)", "Lemon Mint Syrup (1 Scope)"] },
+    { name: "Lemon Mint Cookies Sundae", category: "OTHER", cup: "U Cup", steps: ["5.5 laps Mint Ais Cream", "Cookies (2 Scope = 50g)"] },
+    { name: "Taro Bubble Creamy Drink", category: "OTHER", cup: "500 Plastic Cup", steps: ["5.5 laps Taro Ice Cream (170-190g)", "Tap Cup Downward (Line 5)", "Pearl (1 Scope)", "Concentrated Milk ( 60ml )"] },
+    { name: "Taro Ice Cream", category: "OTHER", cup: "Cone", steps: ["3.5 laps Taro Ice Cream (110 g - 130 g)", "Ice Cream Shape ( Tall )"] }
+  ];
+
+  // ---------- GET STAFF DATA FROM SESSION ----------
+  function getStaffData() {
+    try {
+      const raw = sessionStorage.getItem('mixue_staff_data');
+      if (raw) {
+        const data = JSON.parse(raw);
+        return { name: data.name || 'Staff', outlet: data.outlet_name || data.outlet_id || 'Outlet' };
+      }
+    } catch {}
+    return { name: 'Staff', outlet: 'Outlet' };
+  }
+
+  const staff = getStaffData();
+
+  // ---------- QUIZ ENGINE ----------
+  let quizQuestions = [];
+  let currentIndex = 0;
+  let score = 0;
+  let answered = false;
+  let quizStartTime = Date.now();
+  let timerInterval = null;
+  let secondsElapsed = 0;
+
+  const container = document.getElementById('quizContainer');
+  const headerScore = document.getElementById('headerScore');
+  const headerTimer = document.getElementById('headerTimer');
+  const progressFill = document.getElementById('progressFill');
+  const staffNameDisplay = document.getElementById('staffNameDisplay');
+  const staffOutletDisplay = document.getElementById('staffOutletDisplay');
+
+  // display staff info
+  staffNameDisplay.textContent = staff.name;
+  staffOutletDisplay.textContent = staff.outlet;
+
+  // Timer
+  function startTimer() {
+    if (timerInterval) return;
+    quizStartTime = Date.now();
+    timerInterval = setInterval(() => {
+      secondsElapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+      const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+      const secs = String(secondsElapsed % 60).padStart(2, '0');
+      headerTimer.textContent = `${mins}:${secs}`;
+    }, 200);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function formatTime(sec) {
+    const mins = String(Math.floor(sec / 60)).padStart(2, '0');
+    const secs = String(sec % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
+  }
+
+  // Shuffle
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // Filter out "Add Ice" and "Add Water" steps globally
+  const FILTER_WORDS = ['add ice', 'add water', 'add full ice', 'add full water', 'add ice to 0.8', 'add water until 0.8', 'add ice until 0.8', 'add water until full', 'add ice until love', 'add ice until love line', 'add ice to 0.8 cm', 'add water until 0.8 cm'];
+  function isFilteredStep(step) {
+    const lower = step.toLowerCase();
+    return FILTER_WORDS.some(f => lower.includes(f));
+  }
+
+  // Build questions
+  function buildQuestions(recipes) {
+    const allSteps = [];
+    recipes.forEach(r => {
+      r.steps.forEach(s => {
+        if (!isFilteredStep(s)) allSteps.push(s);
+      });
+    });
+    const uniqueSteps = [...new Set(allSteps)];
+
+    return recipes.map((recipe, idx) => {
+      // filter recipe steps
+      const filteredSteps = recipe.steps.filter(s => !isFilteredStep(s));
+      if (filteredSteps.length === 0) return null; // skip recipes with no valid steps
+
+      const correctStep = filteredSteps[Math.floor(Math.random() * filteredSteps.length)];
+      
+      let pool = uniqueSteps.filter(s => s !== correctStep);
+      shuffle(pool);
+      const distractors = pool.slice(0, 3);
+      
+      let options = [correctStep, ...distractors];
+      shuffle(options);
+      
+      return {
+        id: idx,
+        name: recipe.name,
+        category: recipe.category,
+        cup: recipe.cup,
+        correct: correctStep,
+        options: options
+      };
+    }).filter(q => q !== null);
+  }
+
+  function initQuiz() {
+    stopTimer();
+    secondsElapsed = 0;
+    headerTimer.textContent = '00:00';
+    quizStartTime = Date.now();
+
+    const shuffledRecipes = shuffle([...RECIPES]);
+    quizQuestions = buildQuestions(shuffledRecipes);
+    currentIndex = 0;
+    score = 0;
+    answered = false;
+    updateScoreBadge();
+    updateProgress();
+    renderQuestion();
+    startTimer();
+  }
+
+  function updateScoreBadge() {
+    headerScore.textContent = score;
+  }
+
+  function updateProgress() {
+    const pct = quizQuestions.length > 0 ? ((currentIndex) / quizQuestions.length) * 100 : 0;
+    progressFill.style.width = `${Math.min(pct, 100)}%`;
+  }
+
+  function renderQuestion() {
+    if (currentIndex >= quizQuestions.length) {
+      stopTimer();
+      showResult();
+      return;
+    }
+
+    const q = quizQuestions[currentIndex];
+    answered = false;
+
+    let html = `
+      <div class="quiz-card">
+        <div class="q-meta">
+          <span class="cat">${q.category}</span>
+          <span class="num">${currentIndex + 1} / ${quizQuestions.length}</span>
+        </div>
+        <div class="q-name">${q.name}</div>
+        <div class="q-cup">${q.cup}</div>
+        <div style="font-size:0.85rem; font-weight:600; color:#5a3a3a; margin-bottom:10px;">Which step is correct?</div>
+        <div class="steps-list" id="optionsList">
+    `;
+
+    q.options.forEach((step, idx) => {
+      html += `
+        <div class="step-option" data-idx="${idx}" data-step="${step.replace(/"/g, '&quot;')}">
+          <span class="idx">${String.fromCharCode(65 + idx)}</span>
+          <span>${step}</span>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+        <div class="feedback" id="feedback"></div>
+        <button class="btn-next" id="nextBtn" disabled>Next</button>
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+    document.querySelectorAll('.step-option').forEach(el => {
+      el.addEventListener('click', () => handleOptionClick(el, q));
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (answered) {
+        currentIndex++;
+        updateProgress();
+        renderQuestion();
+        updateScoreBadge();
+      }
+    });
+
+    updateProgress();
+  }
+
+  function handleOptionClick(el, q) {
+    if (answered) return;
+    const selectedStep = el.dataset.step;
+    const isCorrect = (selectedStep === q.correct);
+    const feedback = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+
+    document.querySelectorAll('.step-option').forEach(opt => {
+      opt.classList.add('disabled');
+      const step = opt.dataset.step;
+      if (step === q.correct) {
+        opt.classList.add('reveal-correct');
+      }
+    });
+
+    if (isCorrect) {
+      el.classList.add('correct');
+      feedback.className = 'feedback show correct';
+      feedback.textContent = '✅ Correct! Well done.';
+      score++;
+    } else {
+      el.classList.add('wrong');
+      feedback.className = 'feedback show wrong';
+      feedback.textContent = `❌ Oops! The correct step was: "${q.correct}"`;
+    }
+
+    answered = true;
+    nextBtn.disabled = false;
+    updateScoreBadge();
+  }
+
+  function showResult() {
+    const total = quizQuestions.length;
+    const pct = Math.round((score / total) * 100);
+    const timeStr = formatTime(secondsElapsed);
+    let emoji = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📖';
+    let msg = pct >= 80 ? 'Excellent! You know your recipes!' : pct >= 50 ? 'Good effort! Keep learning.' : 'Review the recipe book and try again.';
+
+    container.innerHTML = `
+      <div class="result-card">
+        <div class="result-header">
+          <div class="logo-sm"><img src="mixue.png" alt="Mixue" /></div>
+          <div class="rh-info">
+            <div class="name">${staff.name}</div>
+            <div class="outlet">${staff.outlet}</div>
+          </div>
+          <div class="rh-score">${score}<span class="denom"> / ${total}</span></div>
+        </div>
+        <div style="text-align:center; font-size:2rem; margin-bottom:6px;">${emoji}</div>
+        <div style="text-align:center; font-weight:600; color:#2d1a1a; font-size:1.1rem; margin-bottom:4px;">${pct}%</div>
+        <div style="text-align:center; color:#5a3a3a; font-size:0.9rem; margin-bottom:14px;">${msg}</div>
+        <div class="result-details">
+          <div class="rd-item">
+            <div class="val">${score}</div>
+            <div class="lbl">Correct</div>
+          </div>
+          <div class="rd-item">
+            <div class="val">${total - score}</div>
+            <div class="lbl">Wrong</div>
+          </div>
+          <div class="rd-item">
+            <div class="val">${total}</div>
+            <div class="lbl">Total Questions</div>
+          </div>
+          <div class="rd-item">
+            <div class="val">${timeStr}</div>
+            <div class="lbl">Time Taken</div>
+          </div>
+        </div>
+        <button class="btn-restart" id="restartBtn">🔄 Try Again</button>
+      </div>
+    `;
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      initQuiz();
+    });
+    progressFill.style.width = '100%';
+    headerScore.textContent = `${score}`;
+  }
+
+  // ---------- START ----------
+  initQuiz();
+</script>
+</body>
+</html>
