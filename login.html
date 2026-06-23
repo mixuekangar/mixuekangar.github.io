@@ -82,7 +82,7 @@
       filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
     }
 
-    /* 时钟面板 - 正式欢乐 */
+    /* 时钟面板 */
     .clock-panel {
       background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(4px);
@@ -126,9 +126,8 @@
       align-items: center;
     }
 
-    /* 店员按钮 - 明亮黄 (多巴胺) */
     .login-btn-clerk {
-      background: #FDD835; /* 明亮黄 */
+      background: #FDD835;
       border: none;
       border-radius: 36px;
       padding: 20px 12px;
@@ -171,9 +170,8 @@
       margin-top: 2px;
     }
 
-    /* 管理员按钮 - 明亮蓝 (多巴胺) */
     .login-btn-admin {
-      background: #4FC3F7; /* 明亮蓝 */
+      background: #4FC3F7;
       border: none;
       border-radius: 36px;
       padding: 20px 12px;
@@ -216,7 +214,7 @@
       margin-top: 2px;
     }
 
-    /* 模态框 - 店员/管理员登录 */
+    /* 模态框 - 包含“记住我”复选框 */
     .login-modal {
       display: none;
       position: fixed;
@@ -286,11 +284,77 @@
       background: white;
       box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.15);
     }
+
+    /* 记住我 复选框行 - 开关风格 */
+    .remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 4px 12px 4px;
+      gap: 8px;
+    }
+    .remember-row label {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #3e2a2a;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    /* 自定义开关 (toggle) */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .25s;
+      border-radius: 34px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .switch input:checked + .slider {
+      background-color: #c62828;
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+    .switch input:focus + .slider {
+      box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.3);
+    }
+
     .modal-actions {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-top: 16px;
+      margin-top: 6px;
     }
     .modal-actions button {
       border: none;
@@ -330,7 +394,7 @@
       display: block;
     }
 
-    /* 底部 - 联系方式 + policy 下划线（不显眼） */
+    /* 底部 */
     .footer-contact {
       margin-top: 6px;
       color: rgba(255, 255, 255, 0.85);
@@ -373,7 +437,6 @@
       color: rgba(255, 255, 255, 0.9);
     }
 
-    /* 小屏微调 */
     @media (max-width: 380px) {
       .login-btn-clerk, .login-btn-admin {
         font-size: 1.7rem;
@@ -391,18 +454,18 @@
 </head>
 <body>
   <div class="login-container">
-    <!-- Brand icon (transparent bg) -->
+    <!-- Brand icon -->
     <div class="brand-icon">
       <img src="mixue.png" alt="Mixue" width="110" height="110">
     </div>
 
-    <!-- Clock + Date -->
+    <!-- Clock -->
     <div class="clock-panel">
       <div class="time" id="liveTime">00:00:00</div>
       <div class="date" id="liveDate">Monday, 1 January 2026</div>
     </div>
 
-    <!-- Two square buttons with dopamine colors -->
+    <!-- Two dopamine buttons -->
     <div class="button-grid">
       <button class="login-btn-clerk" id="clerkLoginBtn">
         STAFF
@@ -416,7 +479,7 @@
       </button>
     </div>
 
-    <!-- Footer: contacts + policy link (understated) -->
+    <!-- Footer -->
     <div class="footer-contact">
       <div>
         <a href="tel:+601153789909">+60 1153789909</a> &nbsp;·&nbsp; 
@@ -431,18 +494,28 @@
     </div>
   </div>
 
-  <!-- Clerk Login Modal -->
+  <!-- Clerk Modal (with remember me) -->
   <div class="login-modal" id="clerkModal">
     <div class="modal-card">
       <h3>STAFF</h3>
       <div class="subhead">Enter IC &amp; password</div>
       <div class="input-group">
         <label>IC Number</label>
-        <input type="text" id="clerkIc" placeholder="070108020147" inputmode="numeric">
+        <input type="text" id="clerkIc" placeholder="070108020147" inputmode="numeric" autocomplete="username">
       </div>
       <div class="input-group">
         <label>Password</label>
-        <input type="password" id="clerkPassword" placeholder="••••••">
+        <input type="password" id="clerkPassword" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <!-- Remember me toggle -->
+      <div class="remember-row">
+        <label for="clerkRemember">
+          <span>Remember me</span>
+          <span class="switch">
+            <input type="checkbox" id="clerkRemember">
+            <span class="slider"></span>
+          </span>
+        </label>
       </div>
       <div class="error-msg" id="clerkError">Invalid IC or password</div>
       <div class="modal-actions">
@@ -452,18 +525,28 @@
     </div>
   </div>
 
-  <!-- Admin Login Modal -->
+  <!-- Admin Modal (with remember me) -->
   <div class="login-modal" id="adminModal">
     <div class="modal-card">
       <h3>ADMIN</h3>
       <div class="subhead">Admin verification</div>
       <div class="input-group">
         <label>IC Number</label>
-        <input type="text" id="adminIc" placeholder="Admin IC" inputmode="numeric">
+        <input type="text" id="adminIc" placeholder="Admin IC" inputmode="numeric" autocomplete="username">
       </div>
       <div class="input-group">
         <label>Password</label>
-        <input type="password" id="adminPassword" placeholder="••••••">
+        <input type="password" id="adminPassword" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <!-- Remember me toggle -->
+      <div class="remember-row">
+        <label for="adminRemember">
+          <span>Remember me</span>
+          <span class="switch">
+            <input type="checkbox" id="adminRemember">
+            <span class="slider"></span>
+          </span>
+        </label>
       </div>
       <div class="error-msg" id="adminError">Invalid IC or password</div>
       <div class="modal-actions">
@@ -481,7 +564,6 @@
       const m = String(now.getMinutes()).padStart(2, '0');
       const s = String(now.getSeconds()).padStart(2, '0');
       document.getElementById('liveTime').textContent = `${h}:${m}:${s}`;
-      
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       document.getElementById('liveDate').textContent = now.toLocaleDateString('en-US', options);
     }
@@ -497,25 +579,96 @@
     const adminPw = document.getElementById('adminPassword');
     const clerkError = document.getElementById('clerkError');
     const adminError = document.getElementById('adminError');
+    const clerkRemember = document.getElementById('clerkRemember');
+    const adminRemember = document.getElementById('adminRemember');
 
-    // Open modals
+    // ---------- 存储/读取 记住的凭证 (localStorage) ----------
+    const STORAGE_KEY_CLERK = 'mixue_clerk_creds';
+    const STORAGE_KEY_ADMIN = 'mixue_admin_creds';
+
+    function loadStoredClerk() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_CLERK);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (data && data.ic && data.password) {
+          return data;
+        }
+        return null;
+      } catch { return null; }
+    }
+
+    function loadStoredAdmin() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ADMIN);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (data && data.ic && data.password) {
+          return data;
+        }
+        return null;
+      } catch { return null; }
+    }
+
+    function saveClerkCreds(ic, password, remember) {
+      if (remember) {
+        localStorage.setItem(STORAGE_KEY_CLERK, JSON.stringify({ ic, password }));
+      } else {
+        localStorage.removeItem(STORAGE_KEY_CLERK);
+      }
+    }
+
+    function saveAdminCreds(ic, password, remember) {
+      if (remember) {
+        localStorage.setItem(STORAGE_KEY_ADMIN, JSON.stringify({ ic, password }));
+      } else {
+        localStorage.removeItem(STORAGE_KEY_ADMIN);
+      }
+    }
+
+    // 填充存储的凭证到modal (打开时)
+    function fillClerkIfStored() {
+      const stored = loadStoredClerk();
+      if (stored) {
+        clerkIc.value = stored.ic || '';
+        clerkPw.value = stored.password || '';
+        clerkRemember.checked = true;
+      } else {
+        clerkRemember.checked = false;
+      }
+    }
+
+    function fillAdminIfStored() {
+      const stored = loadStoredAdmin();
+      if (stored) {
+        adminIc.value = stored.ic || '';
+        adminPw.value = stored.password || '';
+        adminRemember.checked = true;
+      } else {
+        adminRemember.checked = false;
+      }
+    }
+
+    // 打开modal时填充
     document.getElementById('clerkLoginBtn').addEventListener('click', () => {
+      fillClerkIfStored();
       clerkModal.classList.add('active');
       clerkError.classList.remove('show');
-      clerkIc.value = '';
-      clerkPw.value = '';
+      // 如果已经填充，自动聚焦密码或ic
+      if (clerkIc.value && clerkPw.value) {
+        // 可直接登录, 但让用户决定
+      }
       clerkIc.focus();
     });
 
     document.getElementById('adminLoginBtn').addEventListener('click', () => {
+      fillAdminIfStored();
       adminModal.classList.add('active');
       adminError.classList.remove('show');
-      adminIc.value = '';
-      adminPw.value = '';
       adminIc.focus();
     });
 
-    // Close modals
+    // 关闭
     document.getElementById('clerkCancelBtn').addEventListener('click', () => {
       clerkModal.classList.remove('active');
     });
@@ -529,10 +682,12 @@
       if (e.target === adminModal) adminModal.classList.remove('active');
     });
 
-    // ---------- Clerk Login (Firestore staffs) ----------
+    // ---------- Clerk Login ----------
     document.getElementById('clerkSubmitBtn').addEventListener('click', async () => {
       const ic = clerkIc.value.trim();
       const password = clerkPw.value.trim();
+      const remember = clerkRemember.checked;
+
       if (!ic || !password) {
         clerkError.textContent = 'Please fill in IC and password';
         clerkError.classList.add('show');
@@ -559,6 +714,8 @@
         });
 
         if (found) {
+          // 保存记住状态
+          saveClerkCreds(ic, password, remember);
           clerkModal.classList.remove('active');
           window.location.href = 'main.html';
         } else {
@@ -572,10 +729,12 @@
       }
     });
 
-    // ---------- Admin Login (Firestore managers) ----------
+    // ---------- Admin Login ----------
     document.getElementById('adminSubmitBtn').addEventListener('click', async () => {
       const ic = adminIc.value.trim();
       const password = adminPw.value.trim();
+      const remember = adminRemember.checked;
+
       if (!ic || !password) {
         adminError.textContent = 'Please fill in IC and password';
         adminError.classList.add('show');
@@ -602,6 +761,7 @@
         });
 
         if (found) {
+          saveAdminCreds(ic, password, remember);
           adminModal.classList.remove('active');
           window.location.href = 'admin.html';
         } else {
@@ -615,17 +775,20 @@
       }
     });
 
-    // Enter key support
+    // Enter key
     clerkIc.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('clerkSubmitBtn').click(); });
     clerkPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('clerkSubmitBtn').click(); });
     adminIc.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('adminSubmitBtn').click(); });
     adminPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('adminSubmitBtn').click(); });
 
-    // Policy link (demo)
+    // Policy link
     document.getElementById('policyLink').addEventListener('click', (e) => {
       e.preventDefault();
       alert('Mixue Policy · Thank you for reading.');
     });
+
+    // 如果已经存储凭证，打开modal时自动填充，用户只需点击登录
+    // 额外: 若两个都存储，可在按钮上显示快速登录提示 (可省略)
   </script>
 </body>
 </html>
