@@ -200,4 +200,136 @@
       opacity: 0.85;
     }
     .btn-test .deco {
-      font-size: 1.
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: #2a542c;
+      margin-top: 2px;
+    }
+
+    .footer-spacer {
+      margin-top: 20px;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 380px) {
+      .btn-recipe, .btn-test {
+        font-size: 1.7rem;
+        padding: 16px 8px;
+      }
+      .profile-card {
+        padding: 18px 16px;
+      }
+      .avatar {
+        width: 68px;
+        height: 68px;
+      }
+      .profile-info .name {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="profile-card" id="profileCard">
+      <div class="avatar" id="avatarContainer">
+        <img src="mixue.png" alt="Mixue" id="avatarImg">
+      </div>
+      <div class="profile-info">
+        <div class="name" id="displayName">Staff Name</div>
+        <div class="ic" id="displayIc">IC: —</div>
+        <div class="detail-row">
+          <span id="displayPosition">Position</span>
+          <span id="displayJoinDate">Joined: —</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-grid">
+      <button class="btn-recipe" id="recipeBtn">
+        RECIPE
+        <span class="sub">饮料配方</span>
+        <span class="deco">• • •</span>
+      </button>
+      <button class="btn-test" id="testBtn">
+        QUIZ
+        <span class="sub">饮料测验</span>
+        <span class="deco">• • •</span>
+      </button>
+    </div>
+
+    <div class="footer-spacer">mixue · kangar</div>
+  </div>
+
+  <script>
+    // ---------- 登录保护 ----------
+    // 使用同步检查，确保在页面渲染前完成验证
+    (function checkLogin() {
+      const loginFlag = sessionStorage.getItem('mixue_logged_in');
+      const staffDataRaw = sessionStorage.getItem('mixue_staff_data');
+
+      if (!loginFlag || !staffDataRaw) {
+        // 未登录，立即跳转回 login.html
+        window.location.replace('login.html');
+        return;
+      }
+
+      // 解析员工数据
+      let staff = null;
+      try {
+        staff = JSON.parse(staffDataRaw);
+      } catch {
+        window.location.replace('login.html');
+        return;
+      }
+
+      if (!staff || !staff.ic) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      // ✅ 显示员工信息
+      document.getElementById('displayName').textContent = staff.name || 'Staff';
+      document.getElementById('displayIc').textContent = `IC: ${staff.ic || '—'}`;
+      document.getElementById('displayPosition').textContent = staff.position || 'Position';
+      
+      let joinDate = staff.join_date || staff.register_time || '';
+      if (joinDate) {
+        try {
+          if (typeof joinDate === 'object' && joinDate.seconds) {
+            const d = new Date(joinDate.seconds * 1000);
+            joinDate = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+          } else if (typeof joinDate === 'string') {
+            const d = new Date(joinDate);
+            if (!isNaN(d)) {
+              joinDate = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+          }
+        } catch { /* keep original */ }
+      } else {
+        joinDate = '—';
+      }
+      document.getElementById('displayJoinDate').textContent = `Joined: ${joinDate}`;
+    })();
+
+    // ---------- 按钮跳转 ----------
+    document.getElementById('recipeBtn').addEventListener('click', () => {
+      window.location.href = 'recipe.html';
+    });
+
+    document.getElementById('testBtn').addEventListener('click', () => {
+      window.location.href = 'test.html';
+    });
+
+    // ---------- 监听 sessionStorage 变化 (其他标签页) ----------
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'mixue_logged_in' && !e.newValue) {
+        window.location.replace('login.html');
+      }
+    });
+  </script>
+</body>
+</html>
